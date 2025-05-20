@@ -4,9 +4,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum Role {
@@ -34,8 +33,8 @@ model User {
   profile                         UserProfile?
   artisan                         ArtisanProfile?
   sessions                        Session[]
-  artisanCreationRequestsSent     ArtisanCreationRequest[] @relation("userRequesting")
-  artisanCreationRequestsReviewed ArtisanCreationRequest[] @relation("userReviewer")
+  artisanCreationRequestsSent     ArtisanApplication[] @relation("userRequesting")
+  artisanCreationRequestsReviewed ArtisanApplication[] @relation("userReviewer")
 
   @@map("users")
 }
@@ -66,8 +65,8 @@ model ArtisanProfile {
   technique              String
   finalityClassification String   @map("finality_classification")
   sicab                  String
-  sisabRegistrationDate  DateTime @map("sisab_registration_date")
-  sisabValidUntil        DateTime @map("sisab_valid_until")
+  sicabRegistrationDate  DateTime @map("sicab_registration_date")
+  sicabValidUntil        DateTime @map("sicab_valid_until")
   isDisabled             Boolean  @default(true) @map("is_disabled")
 
   user User @relation(fields: [userId], references: [id])
@@ -75,20 +74,25 @@ model ArtisanProfile {
   @@map("artisans_profile")
 }
 
-model ArtisanCreationRequest {
-  id         String        @id @default(uuid())
-  userId     String        @map("fk_user_id")
-  createdAt  DateTime      @default(now()) @map("created_at")
-  updatedAt  DateTime      @default(now()) @map("updated_at")
-  status     RequestStatus @default(PENDING)
-  reviewerId String?       @map("fk_user_reviewer_id")
-  reviwedAt  DateTime?     @map("reviwed_at")
-  reason     String?
+model ArtisanApplication {
+  id                     String        @id @default(uuid())
+  userId                 String        @map("fk_user_id")
+  rawMaterial            String        @map("raw_material")
+  technique              String
+  finalityClassification String        @map("finality_classification")
+  sicab                  String
+  sicabRegistrationDate  DateTime      @map("sicab_registration_date")
+  sicabValidUntil        DateTime      @map("sicab_valid_until")
+  status                 RequestStatus @default(PENDING)
+  createdAt              DateTime      @default(now()) @map("created_at")
+  updatedAt              DateTime      @default(now()) @map("updated_at")
+  reviewerId             String?       @map("fk_user_reviewer_id")
+  rejectionReason        String?
 
   userRequesting User  @relation(fields: [userId], references: [id], name: "userRequesting")
   userReviwer    User? @relation(fields: [reviewerId], references: [id], name: "userReviewer")
 
-  @@map("artisan_creation_requests")
+  @@map("artisan_applications")
 }
 
 model Session {
