@@ -18,6 +18,8 @@ import { GetAllArtisanApplicationsWithUserNamesController } from './controllers/
 import { GetAllArtisanApplicationsWithUserNamesUseCase } from '../core/use-cases/get-all-artisan-applications-with-user-names.use-case';
 import { GetArtisanApplicationDetailsController } from './controllers/get-artisan-application-details.controller';
 import { GetArtisanApplicationDetailsUseCase } from '../core/use-cases/get-artisan-application-details.use-case';
+import { ModerateArtisanApplicationController } from './controllers/moderate-artisan-application.controller';
+import { ModerateArtisanApplicationUseCase } from '../core/use-cases/moderate-artisan-application.use-case';
 
 @Module({
   imports: [IdentityPersistenceModule],
@@ -28,11 +30,10 @@ import { GetArtisanApplicationDetailsUseCase } from '../core/use-cases/get-artis
     DeactivateUserController,
     GetAllUsersController,
     UpdatePersonalProfileDataController,
-
-    // ArtisanModule,
     CreateArtisanApplicationController,
     GetAllArtisanApplicationsWithUserNamesController,
     GetArtisanApplicationDetailsController,
+    ModerateArtisanApplicationController,
   ],
   providers: [
     AddModeratorRoleUseCase,
@@ -41,11 +42,10 @@ import { GetArtisanApplicationDetailsUseCase } from '../core/use-cases/get-artis
     DeactivateUserUseCase,
     GetAllUsersUseCase,
     UpdatePersonalProfileDataUseCase,
-
-    // ArtisanModule,
     CreateArtisanApplicationUseCase,
     GetAllArtisanApplicationsWithUserNamesUseCase,
     GetArtisanApplicationDetailsUseCase,
+    ModerateArtisanApplicationUseCase,
   ],
 })
 export class HttpModule {}

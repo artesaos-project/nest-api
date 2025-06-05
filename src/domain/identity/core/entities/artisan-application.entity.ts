@@ -98,4 +98,17 @@ export class ArtisanApplication extends Entity<ArtisanApplicationProps> {
   get reviewerId() {
     return this.props.reviewerId;
   }
+
+  approveApplication(reviewerId: string) {
+    this.props.reviewerId = reviewerId;
+    this.props.status = ArtisanApplicationStatus.APPROVED;
+    this.touch();
+  }
+
+  rejectApplication(reason: string, reviewerId: string) {
+    this.props.reviewerId = reviewerId;
+    this.props.status = ArtisanApplicationStatus.REJECTED;
+    this.props.rejectionReason = reason;
+    this.touch();
+  }
 }
