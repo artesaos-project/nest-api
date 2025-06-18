@@ -28,6 +28,7 @@ type CreateUserProps = {
   birthDate: string;
   phone: string;
   roles?: UserRole[];
+  isActive?: boolean;
 };
 
 export class User extends Entity<UserProps> {
@@ -44,7 +45,7 @@ export class User extends Entity<UserProps> {
     return new User({
       ...props,
       roles: props.roles ?? [UserRole.USER],
-      isActive: true,
+      isActive: props.isActive ?? true,
     }, id, createdAt, updatedAt);
   }
 

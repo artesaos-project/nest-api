@@ -12,6 +12,7 @@ export class PrismaUsersMapper {
       cpf: profile.cpf,
       birthDate: profile.birthDate.toISOString(),
       phone: profile.phone ?? '',
+      isActive: user.isDisabled,
     }, user.id, user.createdAt, user.updatedAt);
   }
 
@@ -21,6 +22,7 @@ export class PrismaUsersMapper {
       email: user.email,
       password: user.password,
       role: user.roles as UserRole[],
+      isDisabled: user.isActive,
       profile: {
         create: {
           name: user.name,

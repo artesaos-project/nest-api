@@ -56,6 +56,6 @@ export class DeactivateUserController {
       return result.value;
     }
 
-    return new BadRequestException();
+    throw new BadRequestException();
   }
 }
