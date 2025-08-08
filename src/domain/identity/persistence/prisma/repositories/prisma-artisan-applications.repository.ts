@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ApplicationType, RequestStatus } from '@prisma/client';
 import { PrismaService } from '@/shared/prisma/prisma.service';
 import { ArtisanApplication } from '@/domain/identity/core/entities/artisan-application.entity';
 import { PrismaArtisanApplicationsMapper } from '../mappers/prisma-artisan-applications.mappers';
@@ -35,8 +36,17 @@ export class PrismaArtisanApplicationsRepository {
     return PrismaArtisanApplicationsMapper.toDomain(artisanApplication);
   }
 
-  async listAll(): Promise<ArtisanApplication[]> {
-    const artisanApplications = await this.prisma.artisanApplication.findMany();
+  async listAll(
+    type?: ApplicationType,
+    status?: RequestStatus,
+  ): Promise<ArtisanApplication[]> {
+    const where: { type?: ApplicationType; status?: RequestStatus } = {};
+    if (type) where.type = type;
+    if (status) where.status = status;
+
+    const artisanApplications = await this.prisma.artisanApplication.findMany({
+      where,
+    });
 
     if (artisanApplications.length === 0) {
       return [];
@@ -53,6 +63,7 @@ export class PrismaArtisanApplicationsRepository {
       create: {
         id: artisanApplication.id,
         userId: artisanApplication.userId,
+        type: artisanApplication.type,
         rawMaterial: artisanApplication.rawMaterial,
         technique: artisanApplication.technique,
         finalityClassification: artisanApplication.finalityClassification,
@@ -66,6 +77,7 @@ export class PrismaArtisanApplicationsRepository {
         updatedAt: artisanApplication.updatedAt,
       },
       update: {
+        type: artisanApplication.type,
         rawMaterial: artisanApplication.rawMaterial,
         technique: artisanApplication.technique,
         finalityClassification: artisanApplication.finalityClassification,

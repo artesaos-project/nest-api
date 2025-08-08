@@ -1,25 +1,29 @@
 import { Module } from '@nestjs/common';
-import { CreateAccountController } from './controllers/create-account.controller';
-import { CreateAccountUseCase } from '../core/use-cases/create-account.use-case';
 import { IdentityPersistenceModule } from '../persistence/identity-persistence.module';
+import { CreateAccountController } from './controllers/create-account.controller';
 import { AuthenticateController } from './controllers/authenticate.controller';
-import { AuthenticateUseCase } from '../core/use-cases/authenticate.use-case';
 import { AddModeratorRoleController } from './controllers/add-moderator-role.controller';
-import { AddModeratorRoleUseCase } from '../core/use-cases/add-moderator-role.use-case';
 import { DeactivateUserController } from './controllers/deactivate-user.controller';
-import { DeactivateUserUseCase } from '../core/use-cases/deactivate-user.use-case';
-import { GetAllUsersUseCase } from '../core/use-cases/get-all-users.use-case';
 import { GetAllUsersController } from './controllers/get-all-users.controller';
-import { UpdatePersonalProfileDataUseCase } from '../core/use-cases/update-personal-profile-data.use-case';
 import { UpdatePersonalProfileDataController } from './controllers/update-personal-profile-data.controller';
 import { CreateArtisanApplicationController } from './controllers/create-artisan-application.controller';
-import { CreateArtisanApplicationUseCase } from '../core/use-cases/create-artisan-application.use-case';
 import { GetAllArtisanApplicationsWithUserNamesController } from './controllers/get-all-artisan-applications-with-user-names.controller';
-import { GetAllArtisanApplicationsWithUserNamesUseCase } from '../core/use-cases/get-all-artisan-applications-with-user-names.use-case';
 import { GetArtisanApplicationDetailsController } from './controllers/get-artisan-application-details.controller';
+import { CreateAccountUseCase } from '../core/use-cases/create-account.use-case';
+import { AuthenticateUseCase } from '../core/use-cases/authenticate.use-case';
+import { AddModeratorRoleUseCase } from '../core/use-cases/add-moderator-role.use-case';
+import { DeactivateUserUseCase } from '../core/use-cases/deactivate-user.use-case';
+import { GetAllUsersUseCase } from '../core/use-cases/get-all-users.use-case';
+import { UpdatePersonalProfileDataUseCase } from '../core/use-cases/update-personal-profile-data.use-case';
+import { CreateArtisanApplicationUseCase } from '../core/use-cases/create-artisan-application.use-case';
+import { GetAllArtisanApplicationsWithUserNamesUseCase } from '../core/use-cases/get-all-artisan-applications-with-user-names.use-case';
 import { GetArtisanApplicationDetailsUseCase } from '../core/use-cases/get-artisan-application-details.use-case';
 import { ModerateArtisanApplicationController } from './controllers/moderate-artisan-application.controller';
 import { ModerateArtisanApplicationUseCase } from '../core/use-cases/moderate-artisan-application.use-case';
+import { DisableArtisanController } from './controllers/disable-artisan.controller';
+import { RequestDisableArtisanUseCase } from '../core/use-cases/request-disable-artisan.use-case';
+import { ReviewDisableArtisanUseCase } from '../core/use-cases/review-disable-artisan.use-case';
+import { ConfirmDisableArtisanUseCase } from '../core/use-cases/confirm-disable-artisan.use-case';
 
 @Module({
   imports: [IdentityPersistenceModule],
@@ -27,6 +31,7 @@ import { ModerateArtisanApplicationUseCase } from '../core/use-cases/moderate-ar
     AddModeratorRoleController,
     AuthenticateController,
     CreateAccountController,
+    DisableArtisanController,
     DeactivateUserController,
     GetAllUsersController,
     UpdatePersonalProfileDataController,
@@ -38,14 +43,18 @@ import { ModerateArtisanApplicationUseCase } from '../core/use-cases/moderate-ar
   providers: [
     AddModeratorRoleUseCase,
     AuthenticateUseCase,
+    ConfirmDisableArtisanUseCase,
     CreateAccountUseCase,
     DeactivateUserUseCase,
     GetAllUsersUseCase,
+    RequestDisableArtisanUseCase,
+    ReviewDisableArtisanUseCase,
     UpdatePersonalProfileDataUseCase,
     CreateArtisanApplicationUseCase,
     GetAllArtisanApplicationsWithUserNamesUseCase,
     GetArtisanApplicationDetailsUseCase,
     ModerateArtisanApplicationUseCase,
+
   ],
 })
 export class HttpModule {}

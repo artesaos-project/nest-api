@@ -1,6 +1,7 @@
 import {
-  BadRequestException, Controller, Get, NotFoundException, UseGuards,
+  BadRequestException, Controller, Get, NotFoundException, Query, UseGuards,
 } from '@nestjs/common';
+import { ApplicationType, RequestStatus } from '@prisma/client';
 import { JwtAuthGuard } from '@/domain/_shared/auth/jwt/jwt-auth.guard';
 import { RolesGuard } from '@/domain/_shared/auth/roles/roles.guard';
 import { Roles } from '@/domain/_shared/auth/decorators/roles.decorator';
@@ -17,9 +18,12 @@ export class GetAllArtisanApplicationsWithUserNamesController {
   ) {}
 
   @Get()
-  @Roles(UserRole.MODERATOR)
-  async handle() {
-    const result = await this.getAllArtisanApplicationsWithUserNamesUseCase.execute();
+  @Roles(UserRole.MODERATOR, UserRole.ADMIN)
+  async handle(
+    @Query('type') type?: ApplicationType,
+    @Query('status') status?: RequestStatus,
+  ) {
+    const result = await this.getAllArtisanApplicationsWithUserNamesUseCase.execute(type, status);
 
     if (result.isLeft()) {
       const error = result.value;

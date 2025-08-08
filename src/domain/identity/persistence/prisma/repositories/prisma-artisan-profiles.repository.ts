@@ -46,4 +46,11 @@ export class PrismaArtisanProfilesRepository {
       },
     });
   }
+
+  async disableByUserId(userId: string): Promise<void> {
+    await this.prisma.artisanProfile.update({
+      where: { userId },
+      data: { isDisabled: true },
+    });
+  }
 }
