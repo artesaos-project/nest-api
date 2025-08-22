@@ -38,7 +38,6 @@ export class CreateProductController {
           throw new BadRequestException(error.message);
       }
     }
-
     return result.value;
   }
 }

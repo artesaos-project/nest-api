@@ -6,6 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "prisma:seed": "ts-node prisma/seed.ts",
     "build": "nest build",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -39,6 +40,7 @@
     "zod-validation-error": "^3.4.0"
   },
   "devDependencies": {
+    "@faker-js/faker": "^9.9.0",
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
     "@nestjs/cli": "^11.0.0",

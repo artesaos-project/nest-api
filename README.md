@@ -99,6 +99,33 @@ Para gerar as migrações para produção:
 npx prisma migrate deploy
 ```
 
+## 🌱 Populando o Banco de Dados (Seed)
+
+Para popular o banco de dados com dados de exemplo, execute o comando abaixo no terminal da raiz do projeto:
+
+```sh
+npx tsx prisma/seed.ts
+```
+
+O script de seed utiliza o [faker.js](https://fakerjs.dev/) para gerar dados realistas e também realiza upload de imagens para o storage (caso o diretório `prisma/seeds/images` exista).
+
+Caso prefira, adicione um script ao seu arquivo `package.json` para facilitar a execução:
+
+```json
+"scripts": {
+    "seed": "tsx prisma/seed.ts",
+    // ... outros scripts
+}
+```
+
+E então execute:
+
+```sh
+npm run seed
+```
+
+> **Observação:** Certifique-se de que todas as variáveis de ambiente necessárias (como `STORAGE_BUCKET_NAME`, `STORAGE_URL`, `STORAGE_ACCESS_KEY_ID` e `STORAGE_SECRET_ACCESS_KEY`) estejam configuradas corretamente no seu arquivo `.env`.
+
 ## 📌 Considerações Finais
 
 Caso tenha problemas com permissões, tente rodar os comandos com `sudo` (Linux/macOS) ou execute o terminal como administrador (Windows).
