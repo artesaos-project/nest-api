@@ -1,0 +1,40 @@
+version: '3.9'
+
+services:
+  postgres: 
+    container_name: ${POSTGRES_CONTAINER_NAME}
+    image: postgres
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+  minio:
+    image: minio/minio
+    container_name: ${MINIO_CONTAINER_NAME}
+    ports:
+      - "${MINIO_PORT_API}:9000"     # S3 API
+      - "${MINIO_PORT_CONSOLE}:9001" # Painel web
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+
+  mc:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5 &&
+      mc alias set myminio http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} &&
+      mc mb myminio/${MINIO_BUCKET_NAME} --ignore-existing
+      "
+
+volumes:
+  minio-data:

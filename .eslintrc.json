@@ -8,7 +8,7 @@
   "rules": {
     "import/no-extraneous-dependencies": ["off", {"devDependencies": true}],
     "class-methods-use-this": ["off", { "enforceForClassFields": false }],
-    "no-underscore-dangle": ["error", { "allowAfterThis": true }],
+    "no-underscore-dangle": ["off", { "allowAfterThis": true }],
     "import/no-unresolved": ["off", { "ignore": ["^@/"] }],
     "no-useless-constructor": "off",
     "no-empty-function": "off",

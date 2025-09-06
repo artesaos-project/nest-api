@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -7,26 +8,207 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum ApplicationType {
+  BE_ARTISAN      
+  DISABLE_PROFILE 
+}
+
+enum Role {
+  USER
+  ARTISAN
+  MODERATOR
+  ADMIN
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
-  id        String    @id @default(uuid())
-  name      String
-  email     String    @unique
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  products  Product[]
+  id         String   @id @default(uuid())
+  email      String   @unique
+  password   String
+  role       Role[]
+  isDisabled Boolean  @default(false) @map("is_disabled")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  profile                         UserProfile?
+  artisan                         ArtisanProfile?
+  sessions                        Session[]
+  artisanCreationRequestsSent     ArtisanApplication[] @relation("userRequesting")
+  artisanCreationRequestsReviewed ArtisanApplication[] @relation("userReviewer")
+  Attachment                      Attachment[]
+  ProductRating                   ProductRating[]
+  ProductLike                     ProductLike[]
 
   @@map("users")
 }
 
+model UserProfile {
+  id         String   @id @default(uuid())
+  userId     String   @unique @map("fk_user_id")
+  name       String
+  socialName String?  @map("social_name")
+  cpf        String   @unique
+  birthDate  DateTime @map("dt_birth")
+  street     String?
+  postalCode String?  @map("postal_code")
+  city       String?
+  number     String?
+  phone      String?
+  avatar     String?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("users_profile")
+}
+
+model ArtisanProfile {
+  id                     String   @id @default(uuid())
+  userId                 String   @unique @map("fk_user_id")
+  userName               String   @unique @map("user_name")
+  rawMaterial            String   @map("raw_material")
+  avatar                 String?
+  artisticName           String?  @map("artistic_name")
+  email                  String
+  phone                  String
+  bio                    String
+  postalCode             String   @map("postal_code")
+  state                  String
+  city                   String
+  street                 String
+  artType                String   @map("art_type")
+  cnpj                   String
+  number                 String
+  technique              String
+  finalityClassification String   @map("finality_classification")
+  sicab                  String
+  sicabRegistrationDate  DateTime @map("sicab_registration_date")
+  sicabValidUntil        DateTime @map("sicab_valid_until")
+  isDisabled             Boolean  @default(true) @map("is_disabled")
+  createdAt              DateTime @default(now()) @map("created_at")
+  updatedAt              DateTime @default(now()) @map("updated_at")
+
+  user       User         @relation(fields: [userId], references: [id])
+  Attachment Attachment[]
+  Product    Product[]
+
+  @@map("artisans_profile")
+}
+
+model ArtisanApplication {
+  id                     String           @id @default(uuid())
+  userId                 String           @map("fk_user_id")
+  type                   ApplicationType  @default(BE_ARTISAN) @map("type")
+  rawMaterial            String           @map("raw_material")
+  technique              String
+  finalityClassification String           @map("finality_classification")
+  sicab                  String
+  sicabRegistrationDate  DateTime         @map("sicab_registration_date")
+  sicabValidUntil        DateTime         @map("sicab_valid_until")
+  status                 RequestStatus    @default(PENDING)
+  createdAt              DateTime         @default(now()) @map("created_at")
+  updatedAt              DateTime         @default(now()) @map("updated_at")
+  reviewerId             String?          @map("fk_user_reviewer_id")
+  rejectionReason        String?
+
+  userRequesting User  @relation(fields: [userId], references: [id], name: "userRequesting")
+  userReviwer    User? @relation(fields: [reviewerId], references: [id], name: "userReviewer")
+
+  @@map("artisan_applications")
+}
+
+model Attachment {
+  id        String   @id @default(uuid())
+  userId    String?  @map("fk_user_id")
+  artisanId String?  @map("fk_artisan_id")
+  productId String?  @map("fk_product_id")
+  fileType  String   @map("file_type")
+  fileSize  BigInt   @map("file_size")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user    User?           @relation(fields: [userId], references: [id])
+  artisan ArtisanProfile? @relation(fields: [artisanId], references: [id])
+  product Product?        @relation(fields: [productId], references: [id])
+
+  @@map("attachments")
+}
+
 model Product {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  price       Float
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-  userId      String   @map("user_id")
-  user        User     @relation(fields: [userId], references: [id])
+  id            String   @id @default(uuid())
+  artisanId     String   @map("fk_artisan_id")
+  title         String
+  description   String
+  priceInCents  BigInt   @map("price_in_cents")
+  categoryId    BigInt   @map("fk_category_id")
+  stock         Int      @default(0)
+  coverageImage String?  @map("coverage_image")
+  isDisabled    Boolean  @default(false) @map("is_disabled")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  artisan         ArtisanProfile   @relation(fields: [artisanId], references: [userId])
+  productCategory ProductCategory? @relation(fields: [categoryId], references: [id])
+  productRating   ProductRating[]
+  productLike     ProductLike[]
+  Attachment      Attachment[]
 
   @@map("products")
+}
+
+model ProductCategory {
+  id   BigInt @id
+  name String @unique
+  type String
+
+  products Product[]
+
+  @@map("product_categories")
+}
+
+model ProductRating {
+  id        String   @id @default(uuid())
+  productId String   @map("fk_product_id")
+  userId    String   @map("fk_user_id")
+  rating    Int      @default(0)
+  comment   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  product Product @relation(fields: [productId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@map("product_ratings")
+}
+
+model ProductLike {
+  id            String    @id @default(uuid())
+  productId     String    @map("fk_product_id")
+  userId        String    @map("fk_user_id")
+  isLiked       Boolean   @default(true) @map("is_liked")
+  likedAt       DateTime  @default(now()) @map("created_at")
+  likeDeletedAt DateTime? @map("like_deleted_at")
+
+  product Product @relation(fields: [productId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@unique([productId, userId])
+  @@map("product_likes")
+}
+
+model Session {
+  id        String    @id @default(uuid())
+  userId    String    @map("fk_user_id")
+  startedAt DateTime  @default(now()) @map("started_at")
+  endedAt   DateTime? @map("ended_at")
+  ipHost    String    @map("ip_host")
+  device    String
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("sessions")
 }
