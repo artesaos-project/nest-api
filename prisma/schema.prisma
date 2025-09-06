@@ -71,6 +71,18 @@ model ArtisanProfile {
   userId                 String   @unique @map("fk_user_id")
   userName               String   @unique @map("user_name")
   rawMaterial            String   @map("raw_material")
+  avatar                 String?
+  artisticName           String?  @map("artistic_name")
+  email                  String
+  phone                  String
+  bio                    String
+  postalCode             String   @map("postal_code")
+  state                  String
+  city                   String
+  street                 String
+  artType                String   @map("art_type")
+  cnpj                   String
+  number                 String
   technique              String
   finalityClassification String   @map("finality_classification")
   sicab                  String
