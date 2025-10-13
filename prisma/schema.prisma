@@ -36,6 +36,8 @@ model User {
   ArtisanProfile                  ArtisanProfile?
   ProductRating                   ProductRating[]
   ProductLike                     ProductLike[]
+  following                       ArtisanFollower[]    @relation("UserFollowing")
+  followers                       ArtisanFollower[]    @relation("UserFollowers")
 
   @@map("users")
 }
@@ -132,6 +134,19 @@ model ArtisanProfile {
   Product Product[]
 
   @@map("artisan_profiles")
+}
+
+model ArtisanFollower {
+  id          String   @id @default(uuid())
+  followerId  String   @map("fk_follower_id")
+  followingId String   @map("fk_following_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  follower  User @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@map("artisan_followers")
 }
 
 model RawMaterial {

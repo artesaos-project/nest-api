@@ -17,6 +17,11 @@ import { GetArtisanApplicationDetailsController } from './controllers/get-artisa
 import { InitiateArtisanApplicationController } from './controllers/initiate-artisan-application.controller';
 import { ModerateArtisanApplicationController } from './controllers/moderate-artisan-application.controller';
 import { SearchUsersController } from './controllers/search-users.controller';
+import { ToggleArtisanFollowController } from './controllers/artisan-followers.controller';
+import { GetArtisanFollowStatusController } from './controllers/get-artisan-follow-status.controller';
+import { ListUserFollowingController } from './controllers/list-artisan-following.controller';
+import { ListArtisanFollowersController } from './controllers/list-artisan-followers.controller';
+import { ToggleArtisanFollowUseCase } from '../core/use-cases/toggle-artisan-follow.usecase';
 
 @Module({
   imports: [RepositoriesModule, AttachmentsModule],
@@ -29,6 +34,10 @@ import { SearchUsersController } from './controllers/search-users.controller';
     InitiateArtisanApplicationController,
     ModerateArtisanApplicationController,
     SearchUsersController,
+    ListUserFollowingController,
+    ListArtisanFollowersController,
+    ToggleArtisanFollowController,
+    GetArtisanFollowStatusController,
   ],
   providers: [
     AuthenticateUseCase,
@@ -42,6 +51,7 @@ import { SearchUsersController } from './controllers/search-users.controller';
     AuthenticateUseCase,
     GetArtisanApplicationDetailsUseCase,
     ModerateArtisanApplicationUseCase,
+    ToggleArtisanFollowUseCase,
   ],
 })
 export class HttpModule {}
