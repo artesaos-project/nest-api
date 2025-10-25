@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - develop
+      - production
 
 concurrency:
   group: deploy-${{ github.ref }}
@@ -21,13 +21,13 @@ jobs:
       - name: Set environment variables
         id: setenv
         run: |
-          if [ "${{ github.ref_name }}" = "main" ]; then
+          if [ "${{ github.ref_name }}" = "production" ]; then
             echo "DEPLOY_PATH=/root/devops/prd" >> $GITHUB_ENV
-            echo "BRANCH=main" >> $GITHUB_ENV
+            echo "BRANCH=production" >> $GITHUB_ENV
             echo "LOCKFILE=/tmp/deploy-prd.lock" >> $GITHUB_ENV
           else
             echo "DEPLOY_PATH=/root/devops/dev" >> $GITHUB_ENV
-            echo "BRANCH=develop" >> $GITHUB_ENV
+            echo "BRANCH=main" >> $GITHUB_ENV
             echo "LOCKFILE=/tmp/deploy-dev.lock" >> $GITHUB_ENV
           fi
 
