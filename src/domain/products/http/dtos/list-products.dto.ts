@@ -1,5 +1,6 @@
 import {
-  IsOptional, IsString, IsUUID, IsNumber,
+  IsOptional, IsString, IsUUID,
+  IsNumberString,
 } from 'class-validator';
 
 export class ListProductsDto {
@@ -8,7 +9,7 @@ export class ListProductsDto {
     id?: string;
 
   @IsOptional()
-  @IsNumber()
+  @IsNumberString()
     categoryId?: number;
 
   @IsOptional()
