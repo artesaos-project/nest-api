@@ -83,6 +83,15 @@ export class UpdatePersonalProfileDataController {
         newSicabValidUntil: body.sicabValidUntil
           ? new Date(body.sicabValidUntil)
           : undefined,
+        newZipCode: body.zipCode?.trim(),
+        newAddress: body.address?.trim(),
+        newAddressNumber: body.addressNumber?.trim(),
+        newAddressComplement: body.addressComplement !== undefined
+          ? (body.addressComplement?.trim() || null)
+          : undefined,
+        newNeighborhood: body.neighborhood?.trim(),
+        newCity: body.city?.trim(),
+        newState: body.state?.trim().toUpperCase(),
       });
 
       if (artisanProfileResult.isLeft()) {
@@ -107,6 +116,7 @@ export class UpdatePersonalProfileDataController {
           sicabValidUntil: updatedArtisan.sicabValidUntil,
           followersCount: updatedArtisan.followersCount,
           productsCount: updatedArtisan.productsCount,
+          address: updatedArtisan.address,
         },
       };
     }

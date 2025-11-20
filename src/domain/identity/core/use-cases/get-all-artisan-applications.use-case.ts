@@ -21,6 +21,7 @@ export interface ArtisanApplicationWithUserDetails {
   rawMaterial: string[];
   technique: string[];
   sicab: string | null;
+  formStatus: FormStatus
   status: RequestStatus;
   createdAt: Date;
 }
@@ -106,6 +107,7 @@ export class GetAllArtisanApplicationsUseCase {
           rawMaterial: app.rawMaterial,
           technique: app.technique,
           sicab: app.sicab,
+          formStatus: app.formStatus,
           status: app.status,
           createdAt: app.createdAt,
         } as ArtisanApplicationWithUserDetails;

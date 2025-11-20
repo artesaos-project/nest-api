@@ -5,10 +5,11 @@ import {
   MaxLength,
   Matches,
   IsDateString,
+  Length,
+  IsMobilePhone,
 } from 'class-validator';
 
 export class UpdatePersonalProfileDataDto {
-  // Dados pessoais (comuns a todos os usuários)
   @IsOptional()
   @IsString()
   @MinLength(2, { message: 'Nome deve ter pelo menos 2 caracteres' })
@@ -22,16 +23,13 @@ export class UpdatePersonalProfileDataDto {
 
   @IsOptional()
   @IsString()
-  @Matches(/^\(\d{2}\)\s\d{4,5}-\d{4}$/, {
-    message: 'Telefone deve estar no formato (XX) XXXX-XXXX ou (XX) XXXXX-XXXX',
-  })
+  @IsMobilePhone('pt-BR', {}, { message: 'Telefone deve ser um número válido brasileiro' })
     phone?: string;
 
   @IsOptional()
   @IsString()
     avatarId?: string;
 
-  // Dados específicos do artesão (opcionais, só processados se user.roles.includes('ARTISAN'))
   @IsOptional()
   @IsString()
   @MinLength(3, { message: 'Nome de usuário deve ter pelo menos 3 caracteres' })
@@ -59,4 +57,48 @@ export class UpdatePersonalProfileDataDto {
   @IsOptional()
   @IsDateString({}, { message: 'Data de validade SICAB deve ser uma data válida' })
     sicabValidUntil?: string;
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^\d{5}-?\d{3}$/, {
+    message: 'CEP deve estar no formato XXXXX-XXX ou XXXXXXXX',
+  })
+    zipCode?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(3, { message: 'Endereço deve ter pelo menos 3 caracteres' })
+  @MaxLength(200, { message: 'Endereço deve ter no máximo 200 caracteres' })
+    address?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(1, { message: 'Número do endereço é obrigatório' })
+  @MaxLength(20, { message: 'Número do endereço deve ter no máximo 20 caracteres' })
+    addressNumber?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100, { message: 'Complemento deve ter no máximo 100 caracteres' })
+    addressComplement?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(2, { message: 'Bairro deve ter pelo menos 2 caracteres' })
+  @MaxLength(100, { message: 'Bairro deve ter no máximo 100 caracteres' })
+    neighborhood?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(2, { message: 'Cidade deve ter pelo menos 2 caracteres' })
+  @MaxLength(100, { message: 'Cidade deve ter no máximo 100 caracteres' })
+    city?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(2, 2, { message: 'Estado deve ter exatamente 2 caracteres (UF)' })
+  @Matches(/^[A-Z]{2}$/, {
+    message: 'Estado deve ser uma UF válida em maiúsculas (ex: SP, RJ, MG)',
+  })
+    state?: string;
 }

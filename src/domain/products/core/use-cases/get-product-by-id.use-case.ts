@@ -18,6 +18,7 @@ export interface GetProductByIdOutput {
   authorPhoneNumber: string;
   authorAvatarUrl?: string;
   authorProductsCount?: number;
+  authorFollowersCount?: number;
   title: string;
   description: string;
   priceInCents: number;
@@ -78,6 +79,7 @@ export class GetProductByIdUseCase {
       const artisanProfile = await this.artisanProfilesRepository.findByUserId(
         product.artisanId,
       );
+
       if (!artisanProfile) {
         this.logger.error(
           `Perfil de artesão com ID ${product.artisanId} não encontrado`,
@@ -86,6 +88,8 @@ export class GetProductByIdUseCase {
           `Perfil de artesão com ID ${product.artisanId} não encontrado`,
         );
       }
+
+      const authorFollowersCount = artisanProfile.followersCount ?? 0;
 
       this.logger.log(`Produto com ID ${id} encontrado com sucesso`);
 
@@ -97,6 +101,7 @@ export class GetProductByIdUseCase {
         authorPhoneNumber: author.phone,
         authorProductsCount,
         authorAvatarUrl,
+        authorFollowersCount,
         title: product.title,
         description: product.description,
         priceInCents: Number(product.priceInCents),

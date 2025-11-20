@@ -62,7 +62,8 @@ export class AuthenticateController {
         email: user.email,
         avatar: user.avatar,
         artisanUsername: user.artisanUsername,
-        postnedApplication: user.postnedApplication,
+        applicationId: user.applicationId,
+        applicationStatus: user.applicationStatus,
         roles: user.roles,
       },
       session: {

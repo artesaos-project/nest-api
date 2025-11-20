@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { Either, left, right } from '@/domain/_shared/utils/either';
 import { UserNotFoundError } from '../errors/user-not-found.error';
 import { ArtisanProfileNotFoundError } from '../errors/artisan-profile-not-found.error';
@@ -18,6 +19,13 @@ export interface UpdateArtisanProfileInput {
   newSicab?: string;
   newSicabRegistrationDate?: Date;
   newSicabValidUntil?: Date;
+  newZipCode?: string;
+  newAddress?: string;
+  newAddressNumber?: string;
+  newAddressComplement?: string | null;
+  newNeighborhood?: string;
+  newCity?: string;
+  newState?: string;
 }
 
 export interface UpdateArtisanProfileOutput {
@@ -28,6 +36,15 @@ export interface UpdateArtisanProfileOutput {
   sicabValidUntil: Date;
   followersCount: number;
   productsCount: number;
+  address?: {
+    zipCode: string;
+    address: string;
+    addressNumber: string;
+    addressComplement: string | null;
+    neighborhood: string;
+    city: string;
+    state: string;
+  } | null;
 }
 
 type Output = Either<
@@ -72,14 +89,14 @@ export class UpdateArtisanProfileUseCase {
         return left(validationResult);
       }
 
-      const updatedData = await this.updateArtisanInTransaction(input);
-
-      this.logger.log(`Artisan profile updated successfully for user: ${input.artisanId}`);
+      const updatedData = await this.updateArtisanInTransaction(input, artisanProfile.id);
 
       if (!updatedData.artisan) {
         this.logger.error(`Updated artisan data is null for user: ${input.artisanId}`);
         return left(new ArtisanProfileNotFoundError(input.artisanId));
       }
+
+      this.logger.log(`Artisan profile updated successfully for user: ${input.artisanId}`);
 
       return right({
         artisan: {
@@ -90,6 +107,17 @@ export class UpdateArtisanProfileUseCase {
           sicabValidUntil: updatedData.artisan.sicabValidUntil,
           followersCount: updatedData.artisan.followersCount,
           productsCount: updatedData.artisan.productsCount,
+          address: updatedData.address
+            ? {
+              zipCode: updatedData.address.zipCode,
+              address: updatedData.address.address,
+              addressNumber: updatedData.address.addressNumber,
+              addressComplement: updatedData.address.addressComplement,
+              neighborhood: updatedData.address.neighborhood,
+              city: updatedData.address.city,
+              state: updatedData.address.state,
+            }
+            : null,
         },
       });
     } catch (error) {
@@ -120,13 +148,10 @@ export class UpdateArtisanProfileUseCase {
     return null;
   }
 
-  private async updateArtisanInTransaction(input: UpdateArtisanProfileInput) {
+  private async updateArtisanInTransaction(input: UpdateArtisanProfileInput, artisanId: string) {
     return this.prisma.$transaction(async (tx) => {
       const artisanUpdateData: {
         artisanUserName?: string;
-        rawMaterial?: string[];
-        technique?: string[];
-        finalityClassification?: string[];
         bio?: string;
         sicab?: string;
         sicabRegistrationDate?: Date;
@@ -167,9 +192,6 @@ export class UpdateArtisanProfileUseCase {
           data: artisanUpdateData,
           select: {
             artisanUserName: true,
-            rawMaterial: true,
-            technique: true,
-            finalityClassification: true,
             bio: true,
             sicab: true,
             sicabRegistrationDate: true,
@@ -182,9 +204,6 @@ export class UpdateArtisanProfileUseCase {
           where: { userId: input.artisanId },
           select: {
             artisanUserName: true,
-            rawMaterial: true,
-            technique: true,
-            finalityClassification: true,
             bio: true,
             sicab: true,
             sicabRegistrationDate: true,
@@ -194,9 +213,67 @@ export class UpdateArtisanProfileUseCase {
           },
         });
 
+      const address = await this.upsertArtisanAddress(tx, { ...input, artisanId });
+
       return {
         artisan: updatedArtisan,
+        address,
       };
+    });
+  }
+
+  private async upsertArtisanAddress(
+    tx: Prisma.TransactionClient,
+    {
+      artisanId,
+      newZipCode,
+      newAddress,
+      newAddressNumber,
+      newAddressComplement,
+      newNeighborhood,
+      newCity,
+      newState,
+    }: UpdateArtisanProfileInput,
+  ) {
+    const hasAddressUpdates = [
+      newZipCode,
+      newAddress,
+      newAddressNumber,
+      newAddressComplement,
+      newNeighborhood,
+      newCity,
+      newState,
+    ].some((value) => value !== undefined);
+
+    if (!hasAddressUpdates) {
+      return tx.artisanProfileAddress.findUnique({ where: { artisanId } });
+    }
+
+    const payload = {
+      zipCode: newZipCode,
+      address: newAddress,
+      addressNumber: newAddressNumber,
+      addressComplement: newAddressComplement ?? null,
+      neighborhood: newNeighborhood,
+      city: newCity,
+      state: newState,
+    };
+
+    return tx.artisanProfileAddress.upsert({
+      where: { artisanId },
+      update: Object.fromEntries(
+        Object.entries(payload).filter(([, value]) => value !== undefined),
+      ),
+      create: {
+        artisanId,
+        zipCode: payload.zipCode ?? '',
+        address: payload.address ?? '',
+        addressNumber: payload.addressNumber ?? '',
+        addressComplement: payload.addressComplement,
+        neighborhood: payload.neighborhood ?? '',
+        city: payload.city ?? '',
+        state: payload.state ?? '',
+      },
     });
   }
 }

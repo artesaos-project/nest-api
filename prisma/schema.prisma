@@ -40,6 +40,8 @@ model User {
   followers                       ArtisanFollower[]    @relation("UserFollowers")
 
   @@map("users")
+  Report Report[]
+  ReportUser ReportUser[]
 }
 
 model Session {
@@ -246,6 +248,7 @@ model Product {
   @@index([artisanId, isActive])
   @@index([slug])
   @@map("products")
+  ReportProduct ReportProduct[]
 }
 
 model ProductRating {
@@ -253,14 +256,18 @@ model ProductRating {
   productId String   @map("fk_product_id")
   userId    String   @map("fk_user_id")
   rating    Int
-  comment   String?
+  comment   String?  @db.VarChar(500)
   createdAt DateTime @default(now()) @map("created_at")
 
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   user    User    @relation(fields: [userId], references: [id])
 
+  images  Attachment[] @relation("ReviewImages")
+
   @@unique([productId, userId])
+  @@index([productId, createdAt], map: "idx_product_ratings_product_createdat")
   @@map("product_ratings")
+  ReportProductRating ReportProductRating[]
 }
 
 model ProductLike {
@@ -283,13 +290,80 @@ model Attachment {
   productId            String?  @map("fk_product_id")
   fileType             String   @map("file_type")
   fileSize             BigInt   @map("file_size")
+  reviewId             String?  @map("fk_review_id")
   createdAt            DateTime @default(now()) @map("created_at")
 
   user               User?               @relation(fields: [userId], references: [id])
   artisanApplication ArtisanApplication? @relation(fields: [artisanApplicationId], references: [id])
   productCover       Product?            @relation("ProductCoverImage")
   productImages      Product?            @relation("ProductImages", fields: [productId], references: [id])
-
+  reviewImages       ProductRating?      @relation("ReviewImages", fields: [reviewId], references: [id])
+  
   @@index([userId, artisanApplicationId])
   @@map("attachments")
+}
+
+enum ReportReason {
+  INAPPROPRIATE_CONTENT
+  OFFENSIVE_CONTENT
+  FALSE_OR_MISLEADING_INFORMATION
+  COPYRIGHT_VIOLATION
+  PROHIBITED_ITEM_SALE_OR_DISCLOSURE
+  INAPPROPRIATE_LANGUAGE
+  OFF_TOPIC_OR_IRRELEVANT
+  OTHER
+}
+
+model Report {
+  id           String       @id @default(uuid())
+  reporterId   String       @map("fk_reporter_id")
+  reason       ReportReason
+  description  String?
+  isSolved     Boolean      @default(false) @map("is_solved")
+  isDeleted    Boolean      @default(false) @map("is_deleted")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  reporter     User                @relation(fields: [reporterId], references: [id])
+  product      ReportProduct?
+  productRating ReportProductRating?
+
+  @@map("reports")
+  ReportUser ReportUser[] @relation("ReportToUser")
+}
+
+model ReportUser {
+  reportId       String @id @map("fk_report_id")
+  reportedUserId String @map("fk_reported_user_id")
+  reporterId     String
+
+  report Report @relation("ReportToUser", fields: [reportId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [reportedUserId], references: [id])
+
+  @@unique([reporterId, reportedUserId], name: "uniq_reporter_user")
+  @@map("reports_users")
+}
+
+model ReportProduct {
+  reportId  String @id @map("fk_report_id")
+  productId String @map("fk_product_id")
+  reporterId String
+
+  report  Report  @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@unique([reporterId, productId], name: "uniq_reporter_product")
+  @@map("reports_products")
+}
+
+model ReportProductRating {
+  reportId        String @id @map("fk_report_id")
+  productRatingId String @map("fk_product_rating_id")
+  reporterId      String
+
+  report        Report        @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  productRating ProductRating @relation(fields: [productRatingId], references: [id])
+
+  @@unique([reporterId, productRatingId], name: "uniq_reporter_rating")
+  @@map("reports_product_ratings")
 }

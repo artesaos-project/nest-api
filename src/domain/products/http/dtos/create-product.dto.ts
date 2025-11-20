@@ -2,7 +2,6 @@ import {
   IsArray,
   IsNotEmpty,
   IsNumber,
-  IsOptional,
   IsString,
   IsUUID,
   IsPositive,
@@ -65,7 +64,6 @@ export class CreateProductDto {
   @Type(() => Number)
     stock: number;
 
-  @IsOptional()
   @IsArray({ message: 'Fotos devem ser uma lista' })
   @ArrayMaxSize(20, { message: 'Máximo de 20 fotos permitidas' })
   @IsUUID(4, { each: true, message: 'Cada foto deve ter um ID válido' })

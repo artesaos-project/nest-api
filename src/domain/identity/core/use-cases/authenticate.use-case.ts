@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { compare } from 'bcryptjs';
-import { Roles } from '@prisma/client';
+import { RequestStatus, Roles } from '@prisma/client';
 import { Either, left, right } from '@/domain/_shared/utils/either';
 import { UsersRepository } from '@/domain/repositories/users.repository';
 import { PrismaService } from '@/shared/prisma/prisma.service';
@@ -22,6 +22,8 @@ export interface AuthenticateOutput {
     socialName?: string;
     email: string;
     postnedApplication?: boolean;
+    applicationStatus?: RequestStatus | 'NOT_ARTISAN' | 'NOT_FINISHED';
+    applicationId?: string;
     artisanUsername?: string;
     roles: Roles[];
     avatar?: string;
@@ -89,14 +91,23 @@ export class AuthenticateUseCase {
         return { user, session };
       });
 
-      const hasPostnedArtisanApplication = await this.prisma.artisanApplication.findFirst({
+      const application = await this.prisma.artisanApplication.findFirst({
         where: {
           userId: user.id,
-          formStatus: { not: 'SUBMITTED' },
         },
       });
 
       const isArtisan = user.roles.includes(Roles.ARTISAN);
+
+      let applicationStatus: AuthenticateOutput['user']['applicationStatus'];
+
+      if (application && application?.formStatus !== 'SUBMITTED') {
+        applicationStatus = 'NOT_FINISHED';
+      } else if (application?.formStatus === 'SUBMITTED') {
+        applicationStatus = application.status as RequestStatus;
+      } else {
+        applicationStatus = 'NOT_ARTISAN';
+      }
 
       let artisanUsername: { artisanUserName: string } | null = null;
 
@@ -130,7 +141,8 @@ export class AuthenticateUseCase {
           socialName: result.user.socialName ?? undefined,
           email: result.user.email,
           artisanUsername: artisanUsername?.artisanUserName,
-          postnedApplication: !!hasPostnedArtisanApplication,
+          applicationStatus,
+          applicationId: application?.id ?? undefined,
           avatar: avatar ?? undefined,
           roles: result.user.roles,
         },

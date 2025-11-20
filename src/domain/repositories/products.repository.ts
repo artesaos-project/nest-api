@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable } from '@nestjs/common';
-import { Product } from '@prisma/client';
+import { Prisma, Product } from '@prisma/client';
 import { PrismaService } from '@/shared/prisma/prisma.service';
 import { ListProductsInput } from '../products/core/use-cases/list-products.use-case';
 
@@ -145,6 +145,33 @@ export class ProductsRepository {
         },
       },
     };
+  }
+
+  async findByIdCore(
+    id: string,
+    tx?: Prisma.TransactionClient,
+  ): Promise<{ id: string; isActive: boolean; artisanId: string } | null> {
+    const db = (tx ?? this.prisma);
+
+    const row = await db.product.findUnique({
+      where: { id },
+      select: { id: true, isActive: true, artisanId: true },
+    });
+
+    return row ?? null;
+  }
+
+  async updateAverageRating(
+    params: { productId: string; averageRating: number | null },
+    tx?: Prisma.TransactionClient,
+  ): Promise<void> {
+    const { productId, averageRating } = params;
+    const db = (tx ?? this.prisma) as Prisma.TransactionClient | PrismaService;
+
+    await db.product.update({
+      where: { id: productId },
+      data: { averageRating },
+    });
   }
 
   async findRecentWithArtisan(limit: number): Promise<Partial<Product>[]> {

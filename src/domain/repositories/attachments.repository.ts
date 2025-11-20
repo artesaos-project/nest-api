@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Attachment } from '@prisma/client';
+import { Attachment, ProductRating } from '@prisma/client';
 import { PrismaService } from '@/shared/prisma/prisma.service';
 
 export interface CreateAttachmentData {
@@ -140,6 +140,23 @@ export class AttachmentsRepository {
   async findByEntityId(entityId: string): Promise<Attachment[]> {
     return this.prisma.attachment.findMany({
       where: { productId: entityId },
+    });
+  }
+
+  async findByReviewId(reviewId: string): Promise<Attachment[]> {
+    return this.prisma.attachment.findMany({
+      where: { reviewId },
+    });
+  }
+
+  async findRatingsByProductId(productId: string): Promise<Partial<ProductRating>[]> {
+    return this.prisma.productRating.findMany({
+      where: { productId },
+      select: {
+        id: true,
+        comment: true,
+        rating: true,
+      },
     });
   }
 }

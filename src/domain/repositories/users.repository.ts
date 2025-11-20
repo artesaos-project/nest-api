@@ -211,6 +211,14 @@ export class UsersRepository {
     });
   }
 
+  async findIsDisabledById(id: string): Promise<boolean | null> {
+    const row = await this.prisma.user.findUnique({
+      where: { id },
+      select: { isDisabled: true },
+    });
+    return row ? row.isDisabled : null;
+  }
+
   async delete(userId: string): Promise<void> {
     await this.prisma.user.delete({
       where: { id: userId },

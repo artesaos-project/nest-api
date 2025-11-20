@@ -258,4 +258,12 @@ export class ArtisanApplicationsRepository {
 
     return { applications, total };
   }
+
+  async deleteByUserId(userId: string) {
+    await this.prisma.artisanApplication.deleteMany({
+      where: {
+        userId,
+      },
+    });
+  }
 }

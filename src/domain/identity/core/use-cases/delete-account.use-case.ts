@@ -7,6 +7,8 @@ import { S3StorageService } from '@/domain/attachments/s3-storage.service';
 import { AttachmentsRepository } from '@/domain/repositories/attachments.repository';
 import { UserNotFoundError } from '../errors/user-not-found.error';
 import { PrismaService } from '@/shared/prisma/prisma.service';
+import { ArtisanApplicationsRepository } from '@/domain/repositories/artisan-applications.repository';
+import { ReportRepository } from '@/domain/repositories/report.repository';
 
 export interface DeleteAccountInput {
   userId: string;
@@ -33,6 +35,8 @@ export class DeleteAccountUseCase {
     private readonly prisma: PrismaService,
     private readonly usersRepository: UsersRepository,
     private readonly artisanProfilesRepository: ArtisanProfilesRepository,
+    private readonly artisanApplicationsRepository: ArtisanApplicationsRepository,
+    private readonly reportsRepository: ReportRepository,
     private readonly productsRepository: ProductsRepository,
     private readonly attachmentsRepository: AttachmentsRepository,
     private readonly s3StorageService: S3StorageService,
@@ -48,24 +52,36 @@ export class DeleteAccountUseCase {
         return left(new UserNotFoundError(userId, 'id'));
       }
 
+      // 1. Deletar produtos e seus relacionamentos
       const deletedProducts = await this.deleteUserProducts(userId);
 
+      // 2. Deletar anexos do usuário
       const deletedAttachments = await this.deleteUserAttachments(userId);
 
-      const deletedArtisanProfile = await this.deleteArtisanProfile(userId);
-
-      const deletedUserProfile = await this.deleteUserProfile(userId);
-
-      const deletedSessions = await this.deleteUserSessions(userId);
-
+      // 3. Deletar avatar do S3
       if (user.avatar) {
         await this.deleteFromS3(user.avatar);
       }
 
+      // 4. Deletar relacionamentos de seguidor
       await this.deleteFollowerRelationships(userId);
 
+      // 5. Deletar interações do usuário (likes, ratings, reports)
       await this.deleteUserInteractions(userId);
 
+      // 6. Deletar sessões
+      const deletedSessions = await this.deleteUserSessions(userId);
+
+      // 7. Deletar perfil de artesão (se existir)
+      const deletedArtisanProfile = await this.deleteArtisanProfile(userId);
+
+      // 8. Deletar perfil de usuário
+      const deletedUserProfile = await this.deleteUserProfile(userId);
+
+      // 9. IMPORTANTE: Deletar aplicações de artesão ANTES de deletar o usuário
+      await this.deleteArtisanApplications(userId);
+
+      // 10. Por último, deletar o usuário
       await this.usersRepository.delete(userId);
 
       this.logger.log('Account deleted successfully', {
@@ -125,6 +141,32 @@ export class DeleteAccountUseCase {
     return products.length;
   }
 
+  private async deleteArtisanApplications(userId: string): Promise<void> {
+    this.logger.log('Deleting artisan applications', { userId });
+
+    // Buscar todas as aplicações do usuário
+    const applications = await this.prisma.artisanApplication.findMany({
+      where: { userId },
+      select: { id: true },
+    });
+
+    // Deletar anexos de cada aplicação
+    await Promise.all(
+      applications.map(async (app) => {
+        const attachments = await this.attachmentsRepository.findByEntityId(app.id);
+        await Promise.all(
+          attachments.map((attachment) => Promise.all([
+            this.deleteFromS3(attachment.id),
+            this.attachmentsRepository.delete(attachment.id),
+          ])),
+        );
+      }),
+    );
+
+    // Deletar as aplicações
+    await this.artisanApplicationsRepository.deleteByUserId(userId);
+  }
+
   private async deleteUserAttachments(userId: string): Promise<number> {
     this.logger.log('Deleting user attachments', { userId });
 
@@ -148,6 +190,8 @@ export class DeleteAccountUseCase {
     if (!artisanProfile) {
       return false;
     }
+
+    await this.artisanApplicationsRepository.deleteByUserId(userId);
 
     await this.artisanProfilesRepository.deleteAddress(artisanProfile.id);
 
@@ -192,6 +236,8 @@ export class DeleteAccountUseCase {
     await this.productsRepository.deleteUserLikes(userId);
 
     await this.productsRepository.deleteUserRatings(userId);
+
+    await this.reportsRepository.deleteAllUserReports(userId);
   }
 
   private async deleteFromS3(key: string): Promise<void> {
