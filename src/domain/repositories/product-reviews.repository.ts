@@ -101,6 +101,58 @@ export class ProductReviewsRepository {
     return db.productRating.count({ where: { productId } });
   }
 
+  async countByArtisan(artisanId: string): Promise<number> {
+    return this.prisma.productRating.count({
+      where: {
+        product: {
+          artisanId,
+        },
+      },
+    });
+  }
+
+  async listByArtisanWithDetails(
+    artisanId: string,
+    page: number,
+    limit: number,
+  ) {
+    const skip = (page - 1) * limit;
+
+    return this.prisma.productRating.findMany({
+      where: {
+        product: {
+          artisanId,
+        },
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
+        product: {
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+          },
+        },
+        images: {
+          select: {
+            id: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      skip,
+      take: limit,
+    });
+  }
+
   async aggregateByProduct(
     productId: string,
     tx?: Prisma.TransactionClient,

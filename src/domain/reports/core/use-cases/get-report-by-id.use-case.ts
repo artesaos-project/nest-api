@@ -3,6 +3,7 @@ import { Either, left, right } from '@/domain/_shared/utils/either';
 import { ReportRepository } from '../../../repositories/report.repository';
 import { UsersRepository } from '../../../repositories/users.repository';
 import { ReportNotFoundError } from '../errors/report-not-found.error';
+import { S3StorageService } from '@/domain/attachments/s3-storage.service';
 
 type Output = Either<Error, object>;
 
@@ -13,6 +14,7 @@ export class GetReportByIdUseCase {
   constructor(
     private readonly reportsRepository: ReportRepository,
     private readonly usersRepository: UsersRepository,
+    private readonly s3StorageService: S3StorageService,
   ) {
     this.logger.log('GetReportByIdUseCase initialized');
   }
@@ -49,6 +51,10 @@ export class GetReportByIdUseCase {
           ? {
             id: report.product.product.id,
             title: report.product.product.title,
+            image: await this.s3StorageService.getUrlByFileName(
+              report.product.product.coverImageId!,
+            ).catch(() => null),
+            slug: report.product.product.slug,
             description: report.product.product.description,
             priceInCents: Number(report.product.product.priceInCents),
             stock: report.product.product.stock,

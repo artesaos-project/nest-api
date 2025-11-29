@@ -16,17 +16,18 @@ enum Roles {
 }
 
 model User {
-  id         String   @id @default(uuid())
-  email      String   @unique
-  password   String
-  roles      Roles[]
-  name       String
-  phone      String
-  socialName String?  @map("social_name")
-  avatar     String?
-  isDisabled Boolean  @default(false) @map("is_disabled")
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  id                 String   @id @default(uuid())
+  email              String   @unique
+  password           String
+  roles              Roles[]
+  name               String
+  phone              String
+  socialName         String?  @map("social_name")
+  avatar             String?
+  isDisabled         Boolean  @default(false) @map("is_disabled")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+  mustChangePassword Boolean  @default(false) @map("must_change_password")
 
   profile                         UserProfile?
   Session                         Session[]
@@ -38,10 +39,10 @@ model User {
   ProductLike                     ProductLike[]
   following                       ArtisanFollower[]    @relation("UserFollowing")
   followers                       ArtisanFollower[]    @relation("UserFollowers")
+  Report                          Report[]
+  ReportUser                      ReportUser[]
 
   @@map("users")
-  Report Report[]
-  ReportUser ReportUser[]
 }
 
 model Session {
@@ -244,11 +245,11 @@ model Product {
   images            Attachment[]     @relation("ProductImages")
   ProductCategory   ProductCategory? @relation(fields: [productCategoryId], references: [id])
   productCategoryId BigInt?
+  ReportProduct     ReportProduct[]
 
   @@index([artisanId, isActive])
   @@index([slug])
   @@map("products")
-  ReportProduct ReportProduct[]
 }
 
 model ProductRating {
@@ -262,12 +263,12 @@ model ProductRating {
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   user    User    @relation(fields: [userId], references: [id])
 
-  images  Attachment[] @relation("ReviewImages")
+  images              Attachment[]          @relation("ReviewImages")
+  ReportProductRating ReportProductRating[]
 
   @@unique([productId, userId])
   @@index([productId, createdAt], map: "idx_product_ratings_product_createdat")
   @@map("product_ratings")
-  ReportProductRating ReportProductRating[]
 }
 
 model ProductLike {
@@ -298,7 +299,7 @@ model Attachment {
   productCover       Product?            @relation("ProductCoverImage")
   productImages      Product?            @relation("ProductImages", fields: [productId], references: [id])
   reviewImages       ProductRating?      @relation("ReviewImages", fields: [reviewId], references: [id])
-  
+
   @@index([userId, artisanApplicationId])
   @@map("attachments")
 }
@@ -315,21 +316,21 @@ enum ReportReason {
 }
 
 model Report {
-  id           String       @id @default(uuid())
-  reporterId   String       @map("fk_reporter_id")
-  reason       ReportReason
-  description  String?
-  isSolved     Boolean      @default(false) @map("is_solved")
-  isDeleted    Boolean      @default(false) @map("is_deleted")
-  createdAt    DateTime     @default(now()) @map("created_at")
-  updatedAt    DateTime     @updatedAt @map("updated_at")
+  id          String       @id @default(uuid())
+  reporterId  String       @map("fk_reporter_id")
+  reason      ReportReason
+  description String?
+  isSolved    Boolean      @default(false) @map("is_solved")
+  isDeleted   Boolean      @default(false) @map("is_deleted")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
 
-  reporter     User                @relation(fields: [reporterId], references: [id])
-  product      ReportProduct?
+  reporter      User                 @relation(fields: [reporterId], references: [id])
+  product       ReportProduct?
   productRating ReportProductRating?
+  ReportUser    ReportUser[]         @relation("ReportToUser")
 
   @@map("reports")
-  ReportUser ReportUser[] @relation("ReportToUser")
 }
 
 model ReportUser {
@@ -345,8 +346,8 @@ model ReportUser {
 }
 
 model ReportProduct {
-  reportId  String @id @map("fk_report_id")
-  productId String @map("fk_product_id")
+  reportId   String @id @map("fk_report_id")
+  productId  String @map("fk_product_id")
   reporterId String
 
   report  Report  @relation(fields: [reportId], references: [id], onDelete: Cascade)

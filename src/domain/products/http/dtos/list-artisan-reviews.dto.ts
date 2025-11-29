@@ -3,7 +3,7 @@ import {
   IsInt, IsOptional, Max, Min,
 } from 'class-validator';
 
-export class PaginateReviewsDto {
+export class ListArtisanReviewsDto {
   @IsOptional()
   @Transform(({ value }) => Number(value))
   @IsInt({

@@ -33,6 +33,8 @@ import { GetHomeFeedController } from './controllers/get-home-feed.controller';
 import { GetHomeFeedUseCase } from '../core/use-cases/get-home-feed.use-case';
 import { DeleteProductController } from './controllers/delete-product.controller';
 import { DeleteProductUseCase } from '../core/use-cases/delete-product.use-case';
+import { ListArtisanReviewsController } from './controllers/list-artisan-reviews.controller';
+import { ListArtisanReviewsUseCase } from '../core/use-cases/list-artisan-reviews.use-case';
 
 @Module({
   imports: [RepositoriesModule, AttachmentsModule],
@@ -53,6 +55,7 @@ import { DeleteProductUseCase } from '../core/use-cases/delete-product.use-case'
     DeleteProductReviewController,
     AdminDeleteProductReviewController,
     DeleteProductController,
+    ListArtisanReviewsController,
   ],
   providers: [
     CreateProductUseCase,
@@ -71,6 +74,7 @@ import { DeleteProductUseCase } from '../core/use-cases/delete-product.use-case'
     DeleteProductReviewUseCase,
     AdminDeleteProductReviewUseCase,
     DeleteProductUseCase,
+    ListArtisanReviewsUseCase,
   ],
 })
 export class HttpProductsModule {}

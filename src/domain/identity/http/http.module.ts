@@ -36,6 +36,13 @@ import { DeleteAccountController } from './controllers/delete-account.controller
 import { DeleteAccountUseCase } from '../core/use-cases/delete-account.use-case';
 import { UpdateOwnPasswordController } from './controllers/update-own-password.controller';
 import { UpdateOwnPasswordUseCase } from '../core/use-cases/update-own-password.use-case';
+import { ChangeUserPasswordByAdminUseCase } from '../core/use-cases/change-user-password-by-admin.use-case';
+import { ChangeUserPasswordByAdminController } from './controllers/chenge-user-password-by-admin.controller';
+import { ListAdminUsersUseCase } from '../core/use-cases/list-admin-users.use-case';
+import { ListAdminUsersController } from './controllers/list-admin-users.controller';
+import { LogoutUseCase } from '../core/use-cases/logout.use-case';
+import { UpdateProvisionalPasswordController } from './controllers/update-provisional-password.controller';
+import { UpdateProvisionalPasswordUseCase } from '../core/use-cases/update-provisional-password.use-case';
 
 @Module({
   imports: [RepositoriesModule, AttachmentsModule],
@@ -57,9 +64,13 @@ import { UpdateOwnPasswordUseCase } from '../core/use-cases/update-own-password.
     GetArtisanFollowStatusController,
     UpdateOwnPasswordController,
     UpdatePersonalProfileDataController,
+    ChangeUserPasswordByAdminController,
+    UpdateProvisionalPasswordController,
+    ListAdminUsersController,
   ],
   providers: [
     AuthenticateUseCase,
+    LogoutUseCase,
     CompleteArtisanApplicationUseCase,
     CreateUserUseCase,
     DeleteAccountUseCase,
@@ -80,6 +91,9 @@ import { UpdateOwnPasswordUseCase } from '../core/use-cases/update-own-password.
     UpdateArtisanProfileUseCase,
     UpdateOwnPasswordUseCase,
     UpdatePersonalProfileDataUseCase,
+    ChangeUserPasswordByAdminUseCase,
+    ListAdminUsersUseCase,
+    UpdateProvisionalPasswordUseCase,
   ],
 })
 export class HttpModule {}

@@ -6,16 +6,31 @@ import {
   Res,
   Req,
   HttpCode,
+  Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthenticateDto } from '../dtos/authenticate.dto';
 import { Public } from '@/domain/_shared/auth/decorators/public.decorator';
 import { AuthenticateUseCase } from '../../core/use-cases/authenticate.use-case';
+import { LogoutUseCase } from '../../core/use-cases/logout.use-case';
 import { InvalidCredentialsError } from '../../core/errors/invalid-credentials.error';
+
+interface JwtPayload {
+  sub: string;
+  jti: string;
+  email: string;
+  name: string;
+  roles: string[];
+}
 
 @Controller('auth')
 export class AuthenticateController {
-  constructor(private readonly authenticateUseCase: AuthenticateUseCase) {}
+  private readonly logger = new Logger(AuthenticateController.name);
+
+  constructor(
+    private readonly authenticateUseCase: AuthenticateUseCase,
+    private readonly logoutUseCase: LogoutUseCase,
+  ) {}
 
   @Post('login')
   @Public()
@@ -65,11 +80,40 @@ export class AuthenticateController {
         applicationId: user.applicationId,
         applicationStatus: user.applicationStatus,
         roles: user.roles,
+        mustChangePassword: user.mustChangePassword,
       },
       session: {
         id: session.id,
         expiresAt: session.expiresAt,
       },
     });
+  }
+
+  @Post('logout')
+  @HttpCode(200)
+  async logout(
+    @Req() request: Request,
+    @Res() response: Response,
+  ) {
+    const user = request.user as JwtPayload | undefined;
+
+    if (user?.sub && user?.jti) {
+      try {
+        await this.logoutUseCase.execute({
+          userId: user.sub,
+          sessionId: user.jti,
+        });
+      } catch (error) {
+        this.logger.error('Error revoking session during logout:', error);
+      }
+    }
+
+    response.clearCookie('access_token', {
+      httpOnly: true,
+      sameSite: 'lax',
+      path: '/',
+    });
+
+    response.json({ message: 'Logged out successfully' });
   }
 }

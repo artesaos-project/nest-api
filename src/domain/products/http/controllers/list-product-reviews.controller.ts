@@ -4,12 +4,14 @@ import {
 import { ListProductReviewsUseCase } from '../../core/use-cases/list-product-reviews.use-case';
 import { PaginateReviewsDto } from '../dtos/paginate-reviews.dto';
 import { ProductNotFoundError } from '../../core/errors/product-not-found.error';
+import { Public } from '@/domain/_shared/auth/decorators/public.decorator';
 
 @Controller('products/:id/reviews')
 export class ListProductReviewsController {
   constructor(private readonly useCase: ListProductReviewsUseCase) {}
 
   @Get()
+  @Public()
   async handle(
     @Param('id') productId: string,
     @Query() q: PaginateReviewsDto,

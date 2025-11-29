@@ -14,9 +14,10 @@ import { GetReportByIdController } from './controller/get-report-by-id.controlle
 import { ListReportsController } from './controller/list-reports.controller';
 import { CreateProductRatingReportUseCase } from '../core/use-cases/create-product-review-report.use-case';
 import { RepositoriesModule } from '@/domain/repositories/repositories.module';
+import { AttachmentsModule } from '@/domain/attachments/attachments.module';
 
 @Module({
-  imports: [RepositoriesModule],
+  imports: [RepositoriesModule, AttachmentsModule],
   controllers: [
     CreateProductReportController,
     CreateProductRatingReportController,

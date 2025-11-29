@@ -121,6 +121,29 @@ export class AttachmentsRepository {
     });
   }
 
+  async findOrphanAttachments(): Promise<Attachment[]> {
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    return this.prisma.attachment.findMany({
+      where: {
+        AND: [
+          { userId: null },
+          { artisanApplicationId: null },
+          { productId: null },
+          { reviewId: null },
+          {
+            createdAt: {
+              lt: twentyFourHoursAgo,
+            },
+          },
+        ],
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    });
+  }
+
   async delete(id: string): Promise<void> {
     await this.prisma.attachment.delete({
       where: { id },

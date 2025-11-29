@@ -8,10 +8,14 @@ export enum ModerationStatus {
 }
 
 export class ModerateArtisanApplicationDto {
-  @IsEnum(ModerationStatus)
+  @IsEnum(ModerationStatus, {
+    message: 'Status deve ser APPROVED ou REJECTED',
+  })
     status: ModerationStatus;
 
   @ValidateIf((o) => o.status === ModerationStatus.REJECTED)
-  @IsString()
+  @IsString({
+    message: 'Motivo da rejeição deve ser um texto',
+  })
     rejectionReason?: string;
 }

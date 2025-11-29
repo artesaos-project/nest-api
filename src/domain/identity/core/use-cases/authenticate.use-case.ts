@@ -27,6 +27,7 @@ export interface AuthenticateOutput {
     artisanUsername?: string;
     roles: Roles[];
     avatar?: string;
+    mustChangePassword: boolean;
   };
   session: {
     id: string;
@@ -145,6 +146,7 @@ export class AuthenticateUseCase {
           applicationId: application?.id ?? undefined,
           avatar: avatar ?? undefined,
           roles: result.user.roles,
+          mustChangePassword: result.user.mustChangePassword,
         },
         session: {
           id: result.session.id,

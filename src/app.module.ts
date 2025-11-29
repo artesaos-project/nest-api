@@ -9,6 +9,7 @@ import { AttachmentsModule } from './domain/attachments/attachments.module';
 import { HttpProductsModule } from './domain/products/http/http-products.module';
 import { CatalogHttpModule } from './domain/catalog/http/catalog-http.module';
 import { HttpReportsModule } from './domain/reports/http/http-reports.module';
+import { JobsModule } from './shared/job/job.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -21,6 +22,7 @@ import { HttpReportsModule } from './domain/reports/http/http-reports.module';
   AttachmentsModule,
   CatalogHttpModule,
   HttpReportsModule,
+  JobsModule,
   ],
   controllers: [AppController],
   providers: [

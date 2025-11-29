@@ -7,38 +7,54 @@ import {
 
 export class GetAllArtisanApplicationsQueryDto {
   @IsOptional()
-  @IsEnum(ApplicationType)
+  @IsEnum(ApplicationType, {
+    message: 'Tipo de aplicação inválido',
+  })
     type?: ApplicationType;
 
   @IsOptional()
-  @IsEnum(RequestStatus)
+  @IsEnum(RequestStatus, {
+    message: 'Status da solicitação inválido',
+  })
     status?: RequestStatus;
 
   @IsOptional()
-  @IsEnum(FormStatus)
+  @IsEnum(FormStatus, {
+    message: 'Status do formulário inválido',
+  })
     formStatus?: FormStatus;
 
   @IsOptional()
-  @IsInt()
+  @IsInt({
+    message: 'Página deve ser um número inteiro',
+  })
   @Type(() => Number)
   @Transform(({ value }) => {
     const num = Number(value);
     return Number.isNaN(num) ? 20 : num;
   })
-  @Min(1)
+  @Min(1, {
+    message: 'Página deve ser no mínimo 1',
+  })
     page?: number;
 
   @IsOptional()
-  @IsInt()
+  @IsInt({
+    message: 'Limit deve ser um número inteiro',
+  })
   @Type(() => Number)
   @Transform(({ value }) => {
     const num = Number(value);
     return Number.isNaN(num) ? 20 : num;
   })
-  @Min(1)
+  @Min(1, {
+    message: 'Limit deve ser no mínimo 1',
+  })
     limit?: number;
 
   @IsOptional()
-  @IsString()
+  @IsString({
+    message: 'Busca deve ser um texto',
+  })
     search?: string;
 }

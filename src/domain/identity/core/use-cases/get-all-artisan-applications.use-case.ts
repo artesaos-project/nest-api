@@ -21,7 +21,7 @@ export interface ArtisanApplicationWithUserDetails {
   rawMaterial: string[];
   technique: string[];
   sicab: string | null;
-  formStatus: FormStatus
+  formStatus: FormStatus | 'NOT_FINISHED';
   status: RequestStatus;
   createdAt: Date;
 }
@@ -107,7 +107,7 @@ export class GetAllArtisanApplicationsUseCase {
           rawMaterial: app.rawMaterial,
           technique: app.technique,
           sicab: app.sicab,
-          formStatus: app.formStatus,
+          formStatus: app.formStatus !== 'SUBMITTED' ? 'NOT_FINISHED' : app.formStatus,
           status: app.status,
           createdAt: app.createdAt,
         } as ArtisanApplicationWithUserDetails;
