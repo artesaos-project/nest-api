@@ -58,17 +58,13 @@ npm install
 
 2. Configure as variáveis de ambiente no arquivo `.env`, ajustando conforme necessário.
 
-## 🐳 Subindo o Banco de Dados com Docker
+## 🐳 Subindo serviços com Docker (Banco de dados e Storage)
 
-Se estiver utilizando Docker, execute:
+Com o docker instalado, execute:
 
 ```sh
-cp docker-compose.example.yml docker-compose.yml
-
 docker-compose up -d
 ```
-
-Caso esteja utilizando o PostgreSQL localmente, configure as credenciais no `.env` e crie o banco de dados manualmente.
 
 ## 🚀 Executando o Projeto
 
@@ -104,24 +100,7 @@ npx prisma migrate deploy
 Para popular o banco de dados com dados de exemplo, execute o comando abaixo no terminal da raiz do projeto:
 
 ```sh
-npx tsx prisma/seed.ts
-```
-
-O script de seed utiliza o [faker.js](https://fakerjs.dev/) para gerar dados realistas e também realiza upload de imagens para o storage (caso o diretório `prisma/seeds/images` exista).
-
-Caso prefira, adicione um script ao seu arquivo `package.json` para facilitar a execução:
-
-```json
-"scripts": {
-    "seed": "tsx prisma/seed.ts",
-    // ... outros scripts
-}
-```
-
-E então execute:
-
-```sh
-npm run seed
+npx tsx prisma/seeds/test-seed.ts
 ```
 
 > **Observação:** Certifique-se de que todas as variáveis de ambiente necessárias (como `STORAGE_BUCKET_NAME`, `STORAGE_URL`, `STORAGE_ACCESS_KEY_ID` e `STORAGE_SECRET_ACCESS_KEY`) estejam configuradas corretamente no seu arquivo `.env`.
@@ -166,8 +145,8 @@ base64 public.pem > public_base64.txt
 Copie o conteúdo da chave  da versão em Base64 e adicione às variáveis correspondentes no arquivo `.env`:
 
 ```env
-PRIVATE_KEY="[PRIVATE_BASE64]"
-PUBLIC_KEY="[PUBLIC_BASE64]"
+JWT_PRIVATE_KEY="[PRIVATE_BASE64]"
+JWT_PUBLIC_KEY="[PUBLIC_BASE64]"
 ```
 
 > ⚠️ **Atenção**: Nunca versionar os arquivos `.pem` nem expor suas chaves públicas ou privadas em repositórios públicos. Adicione esses arquivos ao `.gitignore`.
