@@ -1,7 +1,5 @@
-version: '3.9'
-
 services:
-  postgres: 
+  postgres:
     container_name: ${POSTGRES_CONTAINER_NAME}
     image: postgres
     ports:
@@ -11,11 +9,33 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
 
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend-dev
+    container_name: nest-api-dev
+    ports:
+      - "3333:3333"
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_CONTAINER_NAME}:${POSTGRES_PORT}/${POSTGRES_DB}
+      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      STORAGE_URL: ${STORAGE_URL}
+      STORAGE_BUCKET_NAME: ${STORAGE_BUCKET_NAME}
+      STORAGE_ACCESS_KEY_ID: ${STORAGE_ACCESS_KEY_ID}
+      STORAGE_SECRET_ACCESS_KEY: ${STORAGE_SECRET_ACCESS_KEY}
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    command: npm run start:dev
+    depends_on:
+      - postgres
+
   minio:
     image: minio/minio
     container_name: ${MINIO_CONTAINER_NAME}
     ports:
-      - "${MINIO_PORT_API}:9000"     # S3 API
+      - "${MINIO_PORT_API}:9000" # S3 API
       - "${MINIO_PORT_CONSOLE}:9001" # Painel web
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}

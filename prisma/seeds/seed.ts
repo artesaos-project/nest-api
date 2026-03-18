@@ -34,23 +34,27 @@ const s3Client = new S3Client({
   },
   forcePathStyle: true, // Necessário para MinIO
   // Desabilitar verificação SSL se estiver usando HTTP (desenvolvimento)
-  ...(process.env.STORAGE_ENDPOINT?.startsWith('http://') && {
+  ...(process.env.STORAGE_URL?.startsWith('http://') && {
     tls: false,
   }),
 });
 
 const BUCKET_NAME = process.env.STORAGE_BUCKET_NAME;
 
-async function uploadToMinio(localPath: string, key: string) {
+export async function uploadToMinio(localPath: string, key: string) {
   try {
     console.log(`⬆️  Uploading: ${key}`);
 
     const Body = await readFile(localPath);
     const ext = extname(localPath).toLowerCase();
-    const ContentType = ext === '.png' ? 'image/png'
-      : ext === '.webp' ? 'image/webp'
-        : ext === '.svg' ? 'image/svg+xml'
-          : ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg'
+    const ContentType = ext === '.png'
+      ? 'image/png'
+      : ext === '.webp'
+        ? 'image/webp'
+        : ext === '.svg'
+          ? 'image/svg+xml'
+          : ext === '.jpg' || ext === '.jpeg'
+            ? 'image/jpeg'
             : 'application/octet-stream';
 
     const command = new PutObjectCommand({

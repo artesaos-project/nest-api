@@ -1,10 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { Either, left, right } from '@/domain/_shared/utils/either';
-import { ProductsRepository } from '@/domain/repositories/products.repository';
-import { S3StorageService } from '@/domain/attachments/s3-storage.service';
-import { UsersRepository } from '@/domain/repositories/users.repository';
-import { ArtisanProfilesRepository } from '@/domain/repositories/artisan-profiles.repository';
-import { ProductNotFoundError } from '../errors/product-not-found.error';
+import { Injectable, Logger } from "@nestjs/common";
+import { Either, left, right } from "@/domain/_shared/utils/either";
+import { ProductsRepository } from "@/domain/repositories/products.repository";
+import { S3StorageService } from "@/domain/attachments/s3-storage.service";
+import { UsersRepository } from "@/domain/repositories/users.repository";
+import { ArtisanProfilesRepository } from "@/domain/repositories/artisan-profiles.repository";
+import { ProductNotFoundError } from "../errors/product-not-found.error";
 
 export interface GetProductByIdInput {
   id: string;
@@ -55,10 +55,10 @@ export class GetProductByIdUseCase {
 
       const photos = product.photos
         ? await Promise.all(
-          product
-            .photos
-            .map((photo) => this.s3StorageService.getUrlByFileName(photo.attachmentId)),
-        )
+            product.photos.map((photo) =>
+              this.s3StorageService.getUrlByFileName(photo.attachmentId),
+            ),
+          )
         : [];
 
       const coverPhoto = product.coverImageId
@@ -71,7 +71,9 @@ export class GetProductByIdUseCase {
         throw new Error(`Usuário com ID ${product.artisanId} não encontrado`);
       }
 
-      const authorProductsCount = (await this.productsRepository.findByArtisanId(author.id)).length;
+      const authorProductsCount = (
+        await this.productsRepository.findByArtisanId(author.id)
+      ).length;
       const authorAvatarUrl = author.avatar
         ? await this.s3StorageService.getUrlByFileName(author.avatar)
         : undefined;
@@ -110,7 +112,9 @@ export class GetProductByIdUseCase {
         likesCount: product.likesCount,
         averageRating: product.averageRating ?? 0,
         photos,
-        photosIds: product.photos ? product.photos.map((p) => p.attachmentId) : [],
+        photosIds: product.photos
+          ? product.photos.map((p) => p.attachmentId)
+          : [],
         coverPhoto,
       });
     } catch (error) {
