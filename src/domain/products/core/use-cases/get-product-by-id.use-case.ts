@@ -1,10 +1,10 @@
-import { Injectable, Logger } from "@nestjs/common";
-import { Either, left, right } from "@/domain/_shared/utils/either";
-import { ProductsRepository } from "@/domain/repositories/products.repository";
-import { S3StorageService } from "@/domain/attachments/s3-storage.service";
-import { UsersRepository } from "@/domain/repositories/users.repository";
-import { ArtisanProfilesRepository } from "@/domain/repositories/artisan-profiles.repository";
-import { ProductNotFoundError } from "../errors/product-not-found.error";
+import { Injectable, Logger } from '@nestjs/common';
+import { Either, left, right } from '@/domain/_shared/utils/either';
+import { ProductsRepository } from '@/domain/repositories/products.repository';
+import { S3StorageService } from '@/domain/attachments/s3-storage.service';
+import { UsersRepository } from '@/domain/repositories/users.repository';
+import { ArtisanProfilesRepository } from '@/domain/repositories/artisan-profiles.repository';
+import { ProductNotFoundError } from '../errors/product-not-found.error';
 
 export interface GetProductByIdInput {
   id: string;
@@ -55,10 +55,8 @@ export class GetProductByIdUseCase {
 
       const photos = product.photos
         ? await Promise.all(
-            product.photos.map((photo) =>
-              this.s3StorageService.getUrlByFileName(photo.attachmentId),
-            ),
-          )
+          product.photos.map((photo) => this.s3StorageService.getUrlByFileName(photo.attachmentId)),
+        )
         : [];
 
       const coverPhoto = product.coverImageId

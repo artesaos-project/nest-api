@@ -1,9 +1,9 @@
-import { Injectable, Logger } from "@nestjs/common";
-import { Either, left, right } from "@/domain/_shared/utils/either";
-import { ProductsRepository } from "@/domain/repositories/products.repository";
-import { S3StorageService } from "@/domain/attachments/s3-storage.service";
-import { UsersRepository } from "@/domain/repositories/users.repository";
-import { ArtisanProfilesRepository } from "@/domain/repositories/artisan-profiles.repository";
+import { Injectable, Logger } from '@nestjs/common';
+import { Either, left, right } from '@/domain/_shared/utils/either';
+import { ProductsRepository } from '@/domain/repositories/products.repository';
+import { S3StorageService } from '@/domain/attachments/s3-storage.service';
+import { UsersRepository } from '@/domain/repositories/users.repository';
+import { ArtisanProfilesRepository } from '@/domain/repositories/artisan-profiles.repository';
 
 export interface ListProductsInput {
   id?: string;
@@ -52,20 +52,16 @@ export class ListProductsUseCase {
       });
 
       if (products.length === 0) {
-        this.logger.warn("Nenhum produto encontrado com os filtros fornecidos");
+        this.logger.warn('Nenhum produto encontrado com os filtros fornecidos');
         return right([]);
       }
 
       const authorsPromise = Promise.all(
-        products.map((product) =>
-          this.usersRepository.findById(product.artisanId),
-        ),
+        products.map((product) => this.usersRepository.findById(product.artisanId)),
       );
 
       const artisansPromise = Promise.all(
-        products.map((product) =>
-          this.artisansRepository.findByUserId(product.artisanId),
-        ),
+        products.map((product) => this.artisansRepository.findByUserId(product.artisanId)),
       );
 
       const [authors, artisans] = await Promise.all([
@@ -96,10 +92,10 @@ export class ListProductsUseCase {
         }),
       );
 
-      this.logger.log("Listagem de produtos concluída com sucesso");
+      this.logger.log('Listagem de produtos concluída com sucesso');
       return right(output);
     } catch (error) {
-      this.logger.error("Erro ao listar produtos", error.stack);
+      this.logger.error('Erro ao listar produtos', error.stack);
 
       return left(error);
     }
