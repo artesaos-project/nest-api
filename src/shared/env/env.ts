@@ -9,6 +9,7 @@ export const envSchema = z.object({
   STORAGE_BUCKET_NAME: z.string(),
   STORAGE_ACCESS_KEY_ID: z.string(),
   STORAGE_SECRET_ACCESS_KEY: z.string(),
+  FRONTEND_URL: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>
