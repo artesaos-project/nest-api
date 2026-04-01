@@ -26,7 +26,7 @@ for (const envVar of requiredEnvVars) {
 }
 
 const s3Client = new S3Client({
-  endpoint: `http://${process.env.MINIO_CONTAINER_NAME}:${process.env.MINIO_PORT_API}`,
+  endpoint: `http://${process.env.MINIO_CONTAINER_NAME}:9000`,
   region: "auto",
   credentials: {
     accessKeyId: process.env.STORAGE_ACCESS_KEY_ID!,
