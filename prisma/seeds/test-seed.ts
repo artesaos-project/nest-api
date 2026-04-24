@@ -66,7 +66,16 @@ async function createUsers() {
         roles: [Roles.USER],
         name: "João Silva",
         phone: "11987654321",
+        profile: {
+          create: {
+            phone: "11987654321",
+            cpf: "12345678901",
+          },
+        },
       },
+      include: {
+        profile: true,
+      }
     }),
     prisma.user.create({
       data: {
@@ -75,7 +84,16 @@ async function createUsers() {
         roles: [Roles.USER],
         name: "Maria Santos",
         phone: "11987654322",
+        profile: {
+          create: {
+            phone: "11987654322",
+            cpf: "12345678902",
+          },
+        },
       },
+      include: {
+        profile: true,
+      }
     }),
     prisma.user.create({
       data: {
@@ -84,7 +102,16 @@ async function createUsers() {
         roles: [Roles.USER],
         name: "Pedro Oliveira",
         phone: "11987654323",
+        profile: {
+          create: {
+            phone: "11987654323",
+            cpf: "12345678903",
+          },
+        },
       },
+      include: {
+        profile: true,
+      }
     }),
     prisma.user.create({
       data: {
@@ -93,7 +120,16 @@ async function createUsers() {
         roles: [Roles.USER],
         name: "Ana Costa",
         phone: "11987654324",
+        profile: {
+          create: {
+            phone: "11987654324",
+            cpf: "12345678904",
+          },
+        },
       },
+      include: {
+        profile: true,
+      }
     }),
     prisma.user.create({
       data: {
@@ -102,7 +138,16 @@ async function createUsers() {
         roles: [Roles.USER],
         name: "Carlos Ferreira",
         phone: "11987654325",
+        profile: {
+          create: {
+            phone: "11987654325",
+            cpf: "12345678905",
+          },
+        },
       },
+      include: {
+        profile: true,
+      }
     }),
   ]);
 
@@ -123,7 +168,16 @@ async function createArtisans() {
         roles: [Roles.ARTISAN],
         name: "Artesão Silva",
         phone: "11987654326",
+        profile: {
+          create: {
+            phone: "11987654326",
+            cpf: "12345678906",
+          },
+        },
       },
+      include: {
+        profile: true,
+      }
     }),
     prisma.user.create({
       data: {
@@ -132,7 +186,16 @@ async function createArtisans() {
         roles: [Roles.ARTISAN],
         name: "Artesã Maria",
         phone: "11987654327",
+        profile: {
+          create: {
+            phone: "11987654327",
+            cpf: "12345678907",
+          },
+        },
       },
+      include: {
+        profile: true,
+      }
     }),
     prisma.user.create({
       data: {
@@ -141,7 +204,16 @@ async function createArtisans() {
         roles: [Roles.ARTISAN],
         name: "Artesão José",
         phone: "11987654328",
+        profile: {
+          create: {
+            phone: "11987654328",
+            cpf: "12345678908",
+          },
+        },
       },
+      include: {
+        profile: true,
+      }
     }),
   ]);
 
@@ -159,6 +231,20 @@ async function createArtisans() {
           sicabRegistrationDate: new Date("2024-01-01"),
           sicabValidUntil: new Date("2026-01-01"),
           bio: `Artesão especializado em técnicas ${["tradicionais", "modernas", "exclusivas"][index]}`,
+          ArtisanProfileAddress: {
+            create: {
+              zipCode: '12345678',
+              address: `Rua dos Artesãos, ${index + 1}`,
+              addressNumber: `${index + 10}`,
+              addressComplement: null,
+              neighborhood: 'Bairro dos Artesãos',
+              city: "São Paulo",
+              state: "SP",
+            },
+          },
+        },
+        include: {
+          ArtisanProfileAddress: true,
         },
       }),
     ),
