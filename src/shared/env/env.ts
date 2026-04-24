@@ -10,6 +10,8 @@ export const envSchema = z.object({
   STORAGE_ACCESS_KEY_ID: z.string(),
   STORAGE_SECRET_ACCESS_KEY: z.string(),
   FRONTEND_URL: z.string().optional(),
+  MINIO_CONTAINER_NAME: z.string().optional().default('minio'),
+  MINIO_PORT_API: z.coerce.number().optional().default(9000),
 });
 
 export type Env = z.infer<typeof envSchema>
