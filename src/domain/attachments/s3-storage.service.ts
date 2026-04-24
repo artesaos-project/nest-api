@@ -20,12 +20,13 @@ export interface UploadResult {
 @Injectable()
 export class S3StorageService {
   private readonly logger = new Logger(S3StorageService.name);
+  private readonly signedUrlClient: S3Client;
 
   constructor(
       private readonly client: S3Client,
       private readonly env: EnvService,
   ) {
-    this.client = new S3Client({
+    this.signedUrlClient = new S3Client({
       endpoint: this.env.get('STORAGE_URL'),
       region: 'auto',
       forcePathStyle: true,
@@ -34,6 +35,17 @@ export class S3StorageService {
         secretAccessKey: this.env.get('STORAGE_SECRET_ACCESS_KEY'),
       },
     });
+
+    this.client = new S3Client({
+      endpoint: `http://${this.env.get('MINIO_CONTAINER_NAME')}:${this.env.get('MINIO_PORT_API')}`,
+      region: 'auto',
+      forcePathStyle: true,
+      credentials: {
+        accessKeyId: this.env.get('STORAGE_ACCESS_KEY_ID'),
+        secretAccessKey: this.env.get('STORAGE_SECRET_ACCESS_KEY'),
+      },
+    })
+
   }
 
   async upload({
@@ -73,7 +85,7 @@ export class S3StorageService {
     });
 
     return getSignedUrl(
-      this.client,
+      this.signedUrlClient,
       command,
       { expiresIn: 60 * 60 * 24 }, // 24 hour expiration
     );
