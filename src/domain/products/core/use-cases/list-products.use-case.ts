@@ -33,9 +33,7 @@ export class ListProductsUseCase {
   constructor(
     private readonly productsRepository: ProductsRepository,
     private readonly s3StorageStorage: S3StorageService,
-    private readonly usersRepository: UsersRepository,
-    private readonly artisansRepository: ArtisanProfilesRepository,
-  ) {}
+  ) { }
 
   async execute({
     id,
@@ -44,7 +42,7 @@ export class ListProductsUseCase {
     title,
   }: ListProductsInput): Promise<Output> {
     try {
-      const products = await this.productsRepository.list({
+      const products = await this.productsRepository.listWithAuthorsAndArtisans({
         id,
         artisanId,
         categoryId,
@@ -56,23 +54,8 @@ export class ListProductsUseCase {
         return right([]);
       }
 
-      const authorsPromise = Promise.all(
-        products.map((product) => this.usersRepository.findById(product.artisanId)),
-      );
-
-      const artisansPromise = Promise.all(
-        products.map((product) => this.artisansRepository.findByUserId(product.artisanId)),
-      );
-
-      const [authors, artisans] = await Promise.all([
-        authorsPromise,
-        artisansPromise,
-      ]);
-
       const output = await Promise.all(
-        products.map(async (product, index) => {
-          const author = authors[index];
-          const artisan = artisans[index];
+        products.map(async (product) => {
 
           const coverPhoto = await this.s3StorageStorage.getUrlByFileName(
             product.coverImageId!,
@@ -80,9 +63,9 @@ export class ListProductsUseCase {
 
           return {
             id: product.id,
-            authorName: author!.name,
-            authorId: author!.id,
-            authorUserName: artisan!.artisanUserName,
+            authorName: product.artisan!.user!.name,
+            authorId: product.artisan!.user!.id,
+            authorUserName: product.artisan!.artisanUserName,
             title: product.title,
             priceInCents: Number(product.priceInCents),
             categoryId,
@@ -92,7 +75,7 @@ export class ListProductsUseCase {
         }),
       );
 
-      this.logger.log('Listagem de produtos concluída com sucesso');
+
       return right(output);
     } catch (error) {
       this.logger.error('Erro ao listar produtos', error.stack);
