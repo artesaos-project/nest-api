@@ -48,6 +48,35 @@ export interface GetFavoritesByUserIdOutput {
   };
 }
 
+interface FavoriteWithProduct {
+  id: string;
+  createdAt: Date;
+  product: {
+    id: string;
+    title: string;
+    description: string;
+    priceInCents: number | bigint;
+    stock: number;
+    coverImageId?: string | null;
+    coverImage?: { id: string } | null;
+    slug: string;
+    viewsCount: number;
+    likesCount: number;
+    averageRating: number | null;
+    isActive: boolean;
+    artisan: {
+      id: string;
+      userId: string;
+      artisanUserName?: string | null;
+      bio?: string | null;
+      user: {
+        id: string;
+        name: string;
+      };
+    };
+  };
+}
+
 type Output = Either<UserNotFoundError, GetFavoritesByUserIdOutput>;
 
 @Injectable()
@@ -85,14 +114,15 @@ export class GetFavoritesByUserIdUseCase {
       const totalFavorites = await this.countUserFavorites(userId);
 
       const processedProducts = await Promise.all(
-        favoriteProducts.map(async (favorite) => {
-          const product = await this.productsRepository.findById(favorite.productId);
+        favoriteProducts.map(async (favorite: FavoriteWithProduct) => {
+            const product = favorite.product;
 
-          if (!product || !product.isActive) {
-            return null;
-          }
+            if (!product || !product.isActive) {
+              return null;
+            }
 
-          const coverImage = await this.generateCoverImageUrl(product.coverImageId);
+            const coverImageId = product.coverImage?.id ?? product.coverImageId ?? null;
+            const coverImage = await this.generateCoverImageUrl(coverImageId);
 
           return {
             id: product.id,
@@ -108,7 +138,7 @@ export class GetFavoritesByUserIdUseCase {
             artisan: {
               id: product.artisan.id,
               userId: product.artisan.userId,
-              userName: product.artisan.userName,
+              userName: product.artisan.artisanUserName ?? product.artisan.user.name,
               bio: product.artisan.bio,
               user: {
                 id: product.artisan.user.id,
@@ -118,7 +148,7 @@ export class GetFavoritesByUserIdUseCase {
           };
         }),
       );
-
+      
       const validProducts = processedProducts.filter(
         (product): product is FavoriteProductOutput => product !== null,
       );
@@ -153,7 +183,7 @@ export class GetFavoritesByUserIdUseCase {
     userId: string,
     page: number,
     limit: number,
-  ) {
+  ): Promise<FavoriteWithProduct[]> {
     const skip = (page - 1) * limit;
 
     return this.prisma.productLike.findMany({
@@ -161,9 +191,39 @@ export class GetFavoritesByUserIdUseCase {
       orderBy: { createdAt: 'desc' },
       skip,
       take: limit,
-      select: {
-        productId: true,
-        createdAt: true,
+      include: {
+        product: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            priceInCents: true,
+            stock: true,
+            coverImageId: true,
+            slug: true,
+            viewsCount: true,
+            likesCount: true,
+            averageRating: true,
+            isActive: true,
+            artisan: {
+              select: {
+                id: true,
+                userId: true,
+                artisanUserName: true,
+                bio: true,
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                },
+              },
+            },
+            coverImage: {
+              select: { id: true },
+            },
+          },
+        },
       },
     });
   }
