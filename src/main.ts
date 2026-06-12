@@ -15,14 +15,17 @@ async function bootstrap() {
 
     app.use(cookieParser());
 
+    const envService = app.get(EnvService);
+
+    const frontEndUrl = envService.get('FRONTEND_URL');
+
     app.enableCors({
-      origin: '*',
+      origin: frontEndUrl,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
       credentials: true,
     });
 
-    const envService = app.get(EnvService);
     const port = envService.get('PORT');
 
     process.on('SIGTERM', async () => {
