@@ -61,10 +61,27 @@ export class ArtisanProfilesRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: ArtisanProfileData): Promise<ArtisanProfile> {
-    const {
-      userId,
+  const {
+    userId,
+    artisanUserName,
+    comercialName,
+    rawMaterial,
+    technique,
+    finalityClassification,
+    sicab,
+    sicabRegistrationDate,
+    sicabValidUntil,
+    bio,
+    followersCount = 0,
+    productsCount = 0,
+    isDisabled = false,
+    address,
+  } = data;
+
+  return this.prisma.artisanProfile.create({
+    data: {
       artisanUserName,
-      comercialName,
+      comercialName: comercialName || '',
       rawMaterial,
       technique,
       finalityClassification,
@@ -72,47 +89,31 @@ export class ArtisanProfilesRepository {
       sicabRegistrationDate,
       sicabValidUntil,
       bio,
-      followersCount = 0,
-      productsCount = 0,
-      isDisabled = false,
-      address,
-    } = data;
-
-    return this.prisma.artisanProfile.create({
-      data: {
-        userId,
-        artisanUserName,
-        comercialName: comercialName || '',
-        rawMaterial,
-        technique,
-        finalityClassification,
-        sicab,
-        sicabRegistrationDate,
-        sicabValidUntil,
-        bio,
-        followersCount,
-        productsCount,
-        isDisabled,
-        // Criar endereço relacionado se fornecido
-        ...(address && {
-          ArtisanProfileAddress: {
-            create: {
-              zipCode: address.zipCode,
-              address: address.address,
-              addressNumber: address.addressNumber,
-              addressComplement: address.addressComplement || null,
-              neighborhood: address.neighborhood,
-              city: address.city,
-              state: address.state,
-            },
+      followersCount,
+      productsCount,
+      isDisabled,
+      user: {
+        connect: { id: userId },
+      },
+      ...(address && {
+        ArtisanProfileAddress: {
+          create: {
+            zipCode: address.zipCode,
+            address: address.address,
+            addressNumber: address.addressNumber,
+            addressComplement: address.addressComplement || null,
+            neighborhood: address.neighborhood,
+            city: address.city,
+            state: address.state,
           },
-        }),
-      },
-      include: {
-        ArtisanProfileAddress: true,
-      },
-    });
-  }
+        },
+      }),
+    },
+    include: {
+      ArtisanProfileAddress: true,
+    },
+  });
+}
 
   async findById(id: string): Promise<ArtisanProfile | null> {
     return this.prisma.artisanProfile.findUnique({
